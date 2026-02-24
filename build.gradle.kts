@@ -1,5 +1,6 @@
 plugins {
   id("java")
+  id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "me.eeshe"
@@ -12,6 +13,7 @@ repositories {
 
 dependencies {
   compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+  implementation("org.mongodb:mongodb-driver-sync:5.6.4")
 }
 
 java {
@@ -22,7 +24,7 @@ tasks.processResources {
     filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to mapOf("version" to project.version))
 }
 
-tasks.jar {
+tasks.shadowJar {
     archiveFileName.set("${project.name}-${project.version}.jar")
     destinationDirectory.set(file("output"))
 }
