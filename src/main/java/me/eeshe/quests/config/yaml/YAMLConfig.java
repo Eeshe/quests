@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import me.eeshe.quests.config.Config;
+import me.eeshe.quests.util.LogUtil;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -39,9 +40,7 @@ public class YAMLConfig implements Config {
       Files.createParentDirs(file);
       return file.createNewFile();
     } catch (IOException e) {
-      plugin
-          .getLogger()
-          .warning("Couldn't create YAML file '" + file + "'. Error message: " + e.getMessage());
+      LogUtil.warning("Couldn't create YAML file '" + file + "'. Error message: " + e.getMessage());
       e.printStackTrace();
       return false;
     }

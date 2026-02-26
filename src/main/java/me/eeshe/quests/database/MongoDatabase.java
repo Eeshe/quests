@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import me.eeshe.quests.Quests;
 import me.eeshe.quests.config.PluginConfig;
+import me.eeshe.quests.util.LogUtil;
 import org.bukkit.plugin.Plugin;
 
 public class MongoDatabase implements Database {
@@ -36,26 +37,25 @@ public class MongoDatabase implements Database {
   private String generateConnectionString(DatabaseSettings databaseSettings) {
     final String host = databaseSettings.host();
     if (host == null || host.isEmpty()) {
-      getPlugin().getLogger().warning("MongoDB host cannt be null or empty");
+      LogUtil.warning("MongoDB host cannot be null or empty");
       return null;
     }
     final String user = databaseSettings.user();
     if (user == null || user.isEmpty()) {
-      getPlugin().getLogger().warning("MongoDB user cannt be null or empty");
+      LogUtil.warning("MongoDB user cannot be null or empty");
       return null;
     }
     final String password = databaseSettings.password();
     if (password == null) {
-      getPlugin().getLogger().warning("MongoDB password cannot be null");
+      LogUtil.warning("MongoDB password cannot be null");
       return null;
     }
     final String database = databaseSettings.database();
     if (database == null || database.isEmpty()) {
-      getPlugin().getLogger().warning("MongoDB database cannot be null or empty");
+      LogUtil.warning("MongoDB database cannot be null or empty");
       return null;
     }
     final int port = databaseSettings.port();
-    getPlugin().getLogger().warning("PORT: " + port);
 
     String uri;
     final boolean isLocal = host.equalsIgnoreCase("localhost") || host.equals("127.0.0.1");

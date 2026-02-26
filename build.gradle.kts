@@ -9,10 +9,13 @@ version = "1.0.0"
 repositories {
   mavenCentral()
   maven("https://repo.papermc.io/repository/maven-public/")
+  maven("https://repo.extendedclip.com/releases/")
 }
 
 dependencies {
   compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+  compileOnly("me.clip:placeholderapi:2.12.2")
+
   implementation("org.mongodb:mongodb-driver-sync:5.6.4")
 }
 
