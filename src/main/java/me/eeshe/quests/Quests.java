@@ -2,6 +2,7 @@ package me.eeshe.quests;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import me.eeshe.quests.config.Config;
 import me.eeshe.quests.config.MessageConfig;
 import me.eeshe.quests.config.PluginConfig;
@@ -42,9 +43,17 @@ public class Quests extends JavaPlugin {
     LogUtil.initialize(this);
 
     loadConfigs();
-    connectDatabase();
-    loadRepositories();
-    registerListeners();
+    connectDatabase()
+        .whenComplete(
+            (unused, throwable) -> {
+              if (!database.isConnected()) {
+                LogUtil.error("Could not connect to database. Plugin will not load.");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+              }
+              loadRepositories();
+              registerListeners();
+            });
   }
 
   private void loadConfigs() {
@@ -59,10 +68,10 @@ public class Quests extends JavaPlugin {
     Message.setMessageConfig(messageConfig);
   }
 
-  private void connectDatabase() {
+  private CompletableFuture<Void> connectDatabase() {
     this.database = new MongoDatabase(this);
 
-    Bukkit.getScheduler().runTaskAsynchronously(this, database::connect);
+    return database.connect();
   }
 
   private void loadRepositories() {
@@ -71,6 +80,8 @@ public class Quests extends JavaPlugin {
     this.questRepository = new QuestRepository(this);
     this.questPlayerRepository = new QuestPlayerRepository(this);
     repositories.addAll(List.of(questRepository, questPlayerRepository));
+
+    database.setRepositories(questRepository, questPlayerRepository);
 
     for (Repository repository : repositories) {
       repository.load();

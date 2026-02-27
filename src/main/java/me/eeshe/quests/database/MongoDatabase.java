@@ -28,32 +28,40 @@ import org.bukkit.plugin.Plugin;
 public class MongoDatabase implements Database {
   private final Plugin plugin;
   private final PluginConfig pluginConfig;
-  private final QuestRepository questRepository;
-  private final QuestPlayerRepository questPlayerRepository;
 
   private String database;
   private MongoClient mongoClient;
+  private QuestRepository questRepository;
+  private QuestPlayerRepository questPlayerRepository;
 
   public MongoDatabase(final Quests plugin) {
     this.plugin = plugin;
     this.pluginConfig = plugin.getPluginConfig();
-    this.questRepository = plugin.getQuestRepository();
-    this.questPlayerRepository = plugin.getQuestPlayerRepository();
   }
 
   @Override
-  public void connect() {
-    final DatabaseSettings databaseSettings = pluginConfig.getDatabaseSettings();
-    final String connectionString = generateConnectionString(databaseSettings);
-    if (connectionString == null) {
-      return;
-    }
-    this.database = databaseSettings.database();
-    this.mongoClient =
-        MongoClients.create(
-            MongoClientSettings.builder()
-                .applyConnectionString(new ConnectionString(connectionString))
-                .build());
+  public CompletableFuture<Void> connect() {
+    final CompletableFuture<Void> future = new CompletableFuture<>();
+    Bukkit.getScheduler()
+        .runTaskAsynchronously(
+            plugin,
+            () -> {
+              final DatabaseSettings databaseSettings = pluginConfig.getDatabaseSettings();
+              final String connectionString = generateConnectionString(databaseSettings);
+              if (connectionString == null) {
+                future.complete(null);
+              }
+              LogUtil.info("Connecting to MongoDB database...");
+              this.database = databaseSettings.database();
+              this.mongoClient =
+                  MongoClients.create(
+                      MongoClientSettings.builder()
+                          .applyConnectionString(new ConnectionString(connectionString))
+                          .build());
+              LogUtil.info("Successfully connected to MongoDB database.");
+              future.complete(null);
+            });
+    return future;
   }
 
   private String generateConnectionString(final DatabaseSettings databaseSettings) {
@@ -96,6 +104,18 @@ public class MongoDatabase implements Database {
               user, password, host, database);
     }
     return uri;
+  }
+
+  @Override
+  public boolean isConnected() {
+    return mongoClient != null;
+  }
+
+  @Override
+  public void setRepositories(
+      QuestRepository questRepository, QuestPlayerRepository questPlayerRepository) {
+    this.questRepository = questRepository;
+    this.questPlayerRepository = questPlayerRepository;
   }
 
   @Override
@@ -172,24 +192,19 @@ public class MongoDatabase implements Database {
 
   @Override
   public void saveQuestPlayer(final IQuestPlayer questPlayer) {
-    System.out.println(1);
     if (mongoClient == null || questPlayer == null) {
       return;
     }
-    System.out.println(2);
     final UUID playerUUid = questPlayer.getUuid();
     final MongoCollection<Document> collection =
         mongoClient.getDatabase(database).getCollection("quest_players");
-    System.out.println(3);
     final Document document =
         new Document("_id", playerUUid.toString())
             .append("completedQuests", questPlayer.getCompletedQuestIds())
             .append("currentQuestId", questPlayer.getCurrentQuestId())
             .append("currentQuestProgress", questPlayer.getCurrentQuestProgress());
-    System.out.println(4);
 
     final ReplaceOptions options = new ReplaceOptions().upsert(true);
     collection.replaceOne(eq("_id", playerUUid.toString()), document, options);
-    System.out.println(5);
   }
 }

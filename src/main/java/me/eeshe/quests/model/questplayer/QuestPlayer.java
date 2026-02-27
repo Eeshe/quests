@@ -29,10 +29,6 @@ public class QuestPlayer implements IQuestPlayer {
     this.currentQuestProgress = 0;
     this.questRepository = questRepository;
     this.questPlayerRepository = questPlayerRepository;
-
-    completedQuestIds.add("mining");
-    currentQuestId = "killing";
-    currentQuestProgress = 30;
   }
 
   public QuestPlayer(

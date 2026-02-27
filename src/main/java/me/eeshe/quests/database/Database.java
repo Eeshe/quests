@@ -2,14 +2,21 @@ package me.eeshe.quests.database;
 
 import java.util.concurrent.CompletableFuture;
 import me.eeshe.quests.model.questplayer.IQuestPlayer;
+import me.eeshe.quests.repository.QuestPlayerRepository;
+import me.eeshe.quests.repository.QuestRepository;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
 public interface Database {
 
-  void connect();
+  CompletableFuture<Void> connect();
 
   void disconnect();
+
+  boolean isConnected();
+
+  void setRepositories(
+      QuestRepository questRepository, QuestPlayerRepository questPlayerRepository);
 
   IQuestPlayer fetchQuestPlayer(OfflinePlayer player);
 
