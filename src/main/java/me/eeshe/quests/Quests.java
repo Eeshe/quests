@@ -9,31 +9,32 @@ import me.eeshe.quests.config.yaml.YAMLMessageConfig;
 import me.eeshe.quests.config.yaml.YAMLPluginConfig;
 import me.eeshe.quests.database.Database;
 import me.eeshe.quests.database.MongoDatabase;
+import me.eeshe.quests.listeners.PlayerConnectionListener;
 import me.eeshe.quests.model.Message;
+import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.repository.Repository;
 import me.eeshe.quests.util.LogUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Quests extends JavaPlugin {
   private final List<Config> configs = new ArrayList<>();
   private final List<Repository> repositories = new ArrayList<>();
+  private final List<Listener> listeners = new ArrayList<>();
 
   private PluginConfig pluginConfig;
 
   private Database database;
 
   private QuestRepository questRepository;
+  private QuestPlayerRepository questPlayerRepository;
 
-  public void reload() {
-    unloadConfigs();
-    disconnectDatabase(true);
-    unloadRepositories();
-
-    loadConfigs();
-    connectDatabase();
-    loadRepositories();
+  public static Quests getInstance() {
+    return getPlugin(Quests.class);
   }
 
   @Override
@@ -43,6 +44,7 @@ public class Quests extends JavaPlugin {
     loadConfigs();
     connectDatabase();
     loadRepositories();
+    registerListeners();
   }
 
   private void loadConfigs() {
@@ -67,10 +69,20 @@ public class Quests extends JavaPlugin {
     repositories.clear();
 
     this.questRepository = new QuestRepository(this);
-    repositories.addAll(List.of(questRepository));
+    this.questPlayerRepository = new QuestPlayerRepository(this);
+    repositories.addAll(List.of(questRepository, questPlayerRepository));
 
     for (Repository repository : repositories) {
       repository.load();
+    }
+  }
+
+  private void registerListeners() {
+    listeners.addAll(List.of(new PlayerConnectionListener(questPlayerRepository)));
+
+    final PluginManager pluginManager = getServer().getPluginManager();
+    for (Listener listener : listeners) {
+      pluginManager.registerEvents(listener, this);
     }
   }
 
@@ -79,6 +91,7 @@ public class Quests extends JavaPlugin {
     unloadConfigs();
     disconnectDatabase(false);
     unloadRepositories();
+    unregisterListeners();
   }
 
   private void unloadConfigs() {
@@ -100,6 +113,24 @@ public class Quests extends JavaPlugin {
     repositories.clear();
   }
 
+  private void unregisterListeners() {
+    for (Listener listener : listeners) {
+      HandlerList.unregisterAll(listener);
+    }
+  }
+
+  public void reload() {
+    unloadConfigs();
+    disconnectDatabase(true);
+    unloadRepositories();
+    unregisterListeners();
+
+    loadConfigs();
+    connectDatabase();
+    loadRepositories();
+    registerListeners();
+  }
+
   public PluginConfig getPluginConfig() {
     return pluginConfig;
   }
@@ -110,5 +141,9 @@ public class Quests extends JavaPlugin {
 
   public QuestRepository getQuestRepository() {
     return questRepository;
+  }
+
+  public QuestPlayerRepository getQuestPlayerRepository() {
+    return questPlayerRepository;
   }
 }

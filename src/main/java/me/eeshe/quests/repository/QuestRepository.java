@@ -1,31 +1,32 @@
 package me.eeshe.quests.repository;
 
-import java.util.HashMap;
-import java.util.Map;
 import me.eeshe.quests.Quests;
+import me.eeshe.quests.cache.QuestCache;
 import me.eeshe.quests.model.quests.Quest;
-import me.eeshe.quests.util.LogUtil;
 
 public class QuestRepository implements Repository {
-  private final Map<String, Quest> quests = new HashMap<>();
-
+  private final QuestCache cache;
   private final Quests plugin;
 
   public QuestRepository(Quests plugin) {
+    this.cache = new QuestCache();
     this.plugin = plugin;
   }
 
   @Override
   public void load() {
-    quests.clear();
+    cache.clear();
     for (Quest quest : plugin.getPluginConfig().getQuests()) {
-      quests.put(quest.getId(), quest);
+      cache.put(quest.getId(), quest);
     }
-    LogUtil.warning("Loaded quests: " + quests.size());
   }
 
   @Override
   public void unload() {
-    quests.clear();
+    cache.clear();
+  }
+
+  public Quest get(String questId) {
+    return cache.get(questId);
   }
 }

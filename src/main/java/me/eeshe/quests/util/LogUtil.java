@@ -19,4 +19,8 @@ public class LogUtil {
   public static void warning(String text) {
     PLUGIN.getLogger().warning(text);
   }
+
+  public static void error(String text) {
+    PLUGIN.getLogger().severe(text);
+  }
 }

@@ -3,6 +3,8 @@ package me.eeshe.quests.model;
 import java.util.ArrayList;
 import java.util.List;
 import me.eeshe.quests.config.MessageConfig;
+
+import org.bukkit.Registry;
 import org.bukkit.command.CommandSender;
 
 public class Message {
@@ -16,6 +18,7 @@ public class Message {
   private String defaultValue;
 
   public Message(String key, boolean defaultEnabled, String defaultValue) {
+      Registry
     this.key = key;
     this.defaultEnabled = defaultEnabled;
     this.defaultValue = defaultValue;

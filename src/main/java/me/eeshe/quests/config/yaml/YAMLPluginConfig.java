@@ -216,7 +216,6 @@ public class YAMLPluginConfig extends YAMLConfig implements PluginConfig {
         }
       }
     }
-    LogUtil.warning("REWARDS: " + rewards.size());
     return rewards;
   }
 
@@ -231,7 +230,6 @@ public class YAMLPluginConfig extends YAMLConfig implements PluginConfig {
 
       commandsRewards.add(new CommandsReward(commands));
     }
-    LogUtil.warning("COMMAND REWARDS: " + commandsRewards.size());
     return commandsRewards;
   }
 
@@ -251,7 +249,6 @@ public class YAMLPluginConfig extends YAMLConfig implements PluginConfig {
 
       itemRewards.add(new ItemReward(item));
     }
-    LogUtil.warning("ITEM REWARDS: " + itemRewards.size());
     return itemRewards;
   }
 }
