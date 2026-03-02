@@ -1,5 +1,7 @@
 package me.eeshe.quests.cache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcurrentHashMapCache<K, V> implements Cache<K, V> {
@@ -23,5 +25,10 @@ public class ConcurrentHashMapCache<K, V> implements Cache<K, V> {
   @Override
   public void clear() {
     cacheMap.clear();
+  }
+
+  @Override
+  public List<V> getValues() {
+    return new ArrayList<>(cacheMap.values());
   }
 }

@@ -1,5 +1,6 @@
 package me.eeshe.quests.cache;
 
+import java.util.List;
 
 public interface Cache<K, V> {
 
@@ -10,4 +11,6 @@ public interface Cache<K, V> {
   void remove(K key);
 
   void clear();
+
+  List<V> getValues();
 }

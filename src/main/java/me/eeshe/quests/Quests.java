@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import me.eeshe.quests.config.Config;
+import me.eeshe.quests.config.Menu;
+import me.eeshe.quests.config.MenuConfig;
 import me.eeshe.quests.config.Message;
 import me.eeshe.quests.config.MessageConfig;
 import me.eeshe.quests.config.PluginConfig;
@@ -11,6 +13,7 @@ import me.eeshe.quests.config.Sound;
 import me.eeshe.quests.config.SoundConfig;
 import me.eeshe.quests.config.registry.MessageRegistry;
 import me.eeshe.quests.config.registry.SoundRegistry;
+import me.eeshe.quests.config.yaml.YAMLMenuConfig;
 import me.eeshe.quests.config.yaml.YAMLMessageConfig;
 import me.eeshe.quests.config.yaml.YAMLPluginConfig;
 import me.eeshe.quests.config.yaml.YAMLSoundConfig;
@@ -69,14 +72,16 @@ public class Quests extends JavaPlugin {
     this.pluginConfig = new YAMLPluginConfig(this);
     final MessageConfig messageConfig = new YAMLMessageConfig(this);
     final SoundConfig soundConfig = new YAMLSoundConfig(this);
+    final MenuConfig menuConfig = new YAMLMenuConfig(this);
 
-    configs.addAll(List.of(pluginConfig, messageConfig, soundConfig));
+    configs.addAll(List.of(pluginConfig, messageConfig, soundConfig, menuConfig));
 
     for (Config config : configs) {
       config.load();
     }
     Message.setMessageConfig(messageConfig);
     Sound.setSoundConfig(soundConfig);
+    Menu.setMenuConfig(menuConfig);
   }
 
   private CompletableFuture<Void> connectDatabase() {

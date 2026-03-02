@@ -8,10 +8,10 @@ public class Sound {
   private static SoundConfig SOUND_CONFIG;
 
   private final String key;
-  private final boolean defaultEnabled;
-  private final org.bukkit.Sound defaultSound;
-  private final float defaultVolume;
-  private final float defaultPitch;
+  private final boolean isEnabled;
+  private final org.bukkit.Sound sound;
+  private final float volume;
+  private final float pitch;
 
   public Sound(
       String key,
@@ -20,20 +20,20 @@ public class Sound {
       float defaultVolume,
       float defaultPitch) {
     this.key = key;
-    this.defaultEnabled = defaultEnabled;
-    this.defaultSound = defaultSound;
-    this.defaultVolume = defaultVolume;
-    this.defaultPitch = defaultPitch;
+    this.isEnabled = defaultEnabled;
+    this.sound = defaultSound;
+    this.volume = defaultVolume;
+    this.pitch = defaultPitch;
 
     SoundRegistry.getInstance().add(this);
   }
 
   public Sound(String key, org.bukkit.Sound defaultSound, float defaultVolume, float defaultPitch) {
     this.key = key;
-    this.defaultEnabled = true;
-    this.defaultSound = defaultSound;
-    this.defaultVolume = defaultVolume;
-    this.defaultPitch = defaultPitch;
+    this.isEnabled = true;
+    this.sound = defaultSound;
+    this.volume = defaultVolume;
+    this.pitch = defaultPitch;
 
     SoundRegistry.getInstance().add(this);
   }
@@ -50,8 +50,7 @@ public class Sound {
     if (sound == null) {
       return;
     }
-    player.playSound(
-        player, sound.getDefaultSound(), sound.getDefaultVolume(), sound.getDefaultPitch());
+    player.playSound(player, sound.getSound(), sound.getVolume(), sound.getPitch());
   }
 
   private Sound get() {
@@ -62,19 +61,19 @@ public class Sound {
     return key;
   }
 
-  public boolean getDefaultEnabled() {
-    return defaultEnabled;
+  public boolean getIsEnabled() {
+    return isEnabled;
   }
 
-  public org.bukkit.Sound getDefaultSound() {
-    return defaultSound;
+  public org.bukkit.Sound getSound() {
+    return sound;
   }
 
-  public float getDefaultVolume() {
-    return defaultVolume;
+  public float getVolume() {
+    return volume;
   }
 
-  public float getDefaultPitch() {
-    return defaultPitch;
+  public float getPitch() {
+    return pitch;
   }
 }

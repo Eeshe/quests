@@ -18,10 +18,10 @@ public class YAMLSoundConfig extends YAMLConfig implements SoundConfig {
   public void writeDefaults() {
     final FileConfiguration config = getConfig();
     for (Sound sound : SoundRegistry.getInstance().values()) {
-      config.addDefault(sound.getKey() + ".enabled", sound.getDefaultEnabled());
-      config.addDefault(sound.getKey() + ".sound", sound.getDefaultSound().name());
-      config.addDefault(sound.getKey() + ".volume", sound.getDefaultVolume());
-      config.addDefault(sound.getKey() + ".pitch", sound.getDefaultPitch());
+      config.addDefault(sound.getKey() + ".enabled", sound.getIsEnabled());
+      config.addDefault(sound.getKey() + ".sound", sound.getSound().name());
+      config.addDefault(sound.getKey() + ".volume", sound.getVolume());
+      config.addDefault(sound.getKey() + ".pitch", sound.getPitch());
     }
     super.writeDefaults();
   }

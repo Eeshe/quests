@@ -1,5 +1,7 @@
 package me.eeshe.quests.repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import me.eeshe.quests.Quests;
 import me.eeshe.quests.cache.QuestCache;
 import me.eeshe.quests.model.quests.Quest;
@@ -28,5 +30,9 @@ public class QuestRepository implements Repository {
 
   public Quest get(String questId) {
     return cache.get(questId);
+  }
+
+  public List<Quest> getAll() {
+    return new ArrayList<>(cache.getValues());
   }
 }
