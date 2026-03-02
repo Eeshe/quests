@@ -1,15 +1,10 @@
-package me.eeshe.quests.model;
+package me.eeshe.quests.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import me.eeshe.quests.config.MessageConfig;
+import me.eeshe.quests.config.registry.MessageRegistry;
 import org.bukkit.command.CommandSender;
 
 public class Message {
-  private static final List<Message> MESSAGES = new ArrayList<>();
   private static MessageConfig MESSAGE_CONFIG;
-
-  public static final Message TEST = new Message("test", true, "This is a test message");
 
   private String key;
   private boolean defaultEnabled;
@@ -20,7 +15,7 @@ public class Message {
     this.defaultEnabled = defaultEnabled;
     this.defaultValue = defaultValue;
 
-    MESSAGES.add(this);
+    MessageRegistry.getInstance().add(this);
   }
 
   public static void setMessageConfig(MessageConfig messageConfig) {
@@ -28,10 +23,6 @@ public class Message {
       return;
     }
     MESSAGE_CONFIG = messageConfig;
-  }
-
-  public static List<Message> values() {
-    return MESSAGES;
   }
 
   public void send(CommandSender sender) {

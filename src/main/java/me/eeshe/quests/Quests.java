@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import me.eeshe.quests.config.Config;
+import me.eeshe.quests.config.Message;
 import me.eeshe.quests.config.MessageConfig;
 import me.eeshe.quests.config.PluginConfig;
+import me.eeshe.quests.config.Sound;
+import me.eeshe.quests.config.SoundConfig;
+import me.eeshe.quests.config.registry.MessageRegistry;
+import me.eeshe.quests.config.registry.SoundRegistry;
 import me.eeshe.quests.config.yaml.YAMLMessageConfig;
 import me.eeshe.quests.config.yaml.YAMLPluginConfig;
+import me.eeshe.quests.config.yaml.YAMLSoundConfig;
 import me.eeshe.quests.database.Database;
 import me.eeshe.quests.database.MongoDatabase;
 import me.eeshe.quests.listeners.PlayerConnectionListener;
-import me.eeshe.quests.model.Message;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.repository.Repository;
@@ -53,19 +58,25 @@ public class Quests extends JavaPlugin {
               }
               loadRepositories();
               registerListeners();
+              for (int i = 0; i < 10; i++) {
+                MessageRegistry.TEST.send(Bukkit.getConsoleSender());
+                SoundRegistry.TEST.play(Bukkit.getConsoleSender());
+              }
             });
   }
 
   private void loadConfigs() {
     this.pluginConfig = new YAMLPluginConfig(this);
     final MessageConfig messageConfig = new YAMLMessageConfig(this);
+    final SoundConfig soundConfig = new YAMLSoundConfig(this);
 
-    configs.addAll(List.of(pluginConfig, messageConfig));
+    configs.addAll(List.of(pluginConfig, messageConfig, soundConfig));
 
     for (Config config : configs) {
       config.load();
     }
     Message.setMessageConfig(messageConfig);
+    Sound.setSoundConfig(soundConfig);
   }
 
   private CompletableFuture<Void> connectDatabase() {
