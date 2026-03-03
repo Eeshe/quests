@@ -11,7 +11,7 @@ public class MenuRegistry extends ConfigRegistry<Menu> {
 
   public static final Menu QUEST_LIST =
       new Menu(
-          "quest-ist",
+          "quest-list",
           54,
           "Quest List",
           ItemBuilder.builder().material(Material.CYAN_STAINED_GLASS_PANE).displayName(" ").build(),

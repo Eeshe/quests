@@ -7,12 +7,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class AbstractMenu {
-  private static final int PAGE_SIZE = 28;
-
   private final Menu menu;
 
   public AbstractMenu(Menu menu) {
-    this.menu = menu;
+    this.menu = menu.get();
   }
 
   public abstract Inventory create();
@@ -36,7 +34,8 @@ public abstract class AbstractMenu {
       return;
     }
     for (int slot = 0; slot < inventory.getSize(); slot++) {
-      if (inventory.getItem(slot) != null) {
+      final ItemStack slotItem = inventory.getItem(slot);
+      if (slotItem != null && !slotItem.getType().isAir()) {
         continue;
       }
       inventory.setItem(slot, fillerItem);
@@ -65,6 +64,9 @@ public abstract class AbstractMenu {
   }
 
   public boolean isFrameSlot(int slot, int totalSize) {
+    if (totalSize <= 18) {
+      return slot == 0 || slot == 8 || slot == 9 || slot == 17;
+    }
     int rows = totalSize / 9;
     int row = slot / 9;
     int col = slot % 9;
@@ -72,11 +74,21 @@ public abstract class AbstractMenu {
   }
 
   public int computeEndIndex(int page, int itemAmount) {
-    return Math.min(computeStartIndex(page) + PAGE_SIZE, itemAmount);
+    return Math.min(computeStartIndex(page) + computePageSize(), itemAmount);
   }
 
   public int computeStartIndex(int page) {
-    return (page - 1) * PAGE_SIZE;
+    return (page - 1) * computePageSize();
+  }
+
+  public int computePageSize() {
+    final int menuSize = menu.getSize();
+    final int rows = (menuSize / 9);
+    if (menuSize <= 18) {
+      return rows * 7;
+    } else {
+      return (rows - 2) * 7;
+    }
   }
 
   public Menu getMenu() {

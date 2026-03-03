@@ -50,7 +50,6 @@ public class YAMLUtil {
       configuration.set(key + ".custom-model-data", meta.getCustomModelData());
     }
     final Set<ItemFlag> flags = meta.getItemFlags();
-    System.out.println("FLAGS: " + flags.size());
     if (!flags.isEmpty()) {
       final List<String> flagNames = flags.stream().map(ItemFlag::name).toList();
       configuration.set(key + ".flags", flagNames);

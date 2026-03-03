@@ -66,6 +66,7 @@ public class YAMLConfig implements Config {
     try {
       config.options().copyDefaults(true);
       config.save(file);
+      config = YamlConfiguration.loadConfiguration(file);
     } catch (IOException e) {
       plugin
           .getLogger()

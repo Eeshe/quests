@@ -44,17 +44,18 @@ public class Menu {
   }
 
   public static final void setMenuConfig(MenuConfig menuConfig) {
-    if (MENU_CONFIG != null) {
-      return;
-    }
     MENU_CONFIG = menuConfig;
   }
 
   public Inventory createInventory(MenuHolder menuHolder, OfflinePlayer player) {
     final String title =
-        PlaceholderUtil.formatPlaceholders(player, StringUtil.formatColor(getTitle()));
+        PlaceholderUtil.formatPlaceholders(player, StringUtil.formatColor(this.title));
 
     return Bukkit.createInventory(menuHolder, size, title);
+  }
+
+  public Menu get() {
+    return MENU_CONFIG.get(key);
   }
 
   public String getKey() {

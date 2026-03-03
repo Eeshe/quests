@@ -2,6 +2,7 @@ main: me.eeshe.quests.Quests
 name: Quests
 version: "@version@"
 api-version: 1.21
+author: Eeshe
 softdepends: [PlaceholderAPI]
 
 commands:

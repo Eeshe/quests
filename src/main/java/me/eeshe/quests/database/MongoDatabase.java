@@ -58,6 +58,12 @@ public class MongoDatabase implements Database {
                       MongoClientSettings.builder()
                           .applyConnectionString(new ConnectionString(connectionString))
                           .build());
+              try {
+                mongoClient.getDatabase(database).getCollection("quest_players").find().first();
+              } catch (Exception e) {
+                future.completeExceptionally(e);
+                return;
+              }
               LogUtil.info("Successfully connected to MongoDB database.");
               future.complete(null);
             });
@@ -159,8 +165,8 @@ public class MongoDatabase implements Database {
     }
     final Set<String> completedQuests =
         new HashSet<>(document.getList("completedQuests", String.class, new ArrayList<>()));
-    final Map<String, Integer> map = document.get("questProgress", Map.class);
-    final ConcurrentHashMap<String, Integer> questProgress;
+    final Map<String, Double> map = document.get("questProgress", Map.class);
+    final ConcurrentHashMap<String, Double> questProgress;
     if (map == null) {
       questProgress = new ConcurrentHashMap<>();
     } else {

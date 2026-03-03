@@ -2,6 +2,7 @@ package me.eeshe.quests.menu;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import me.eeshe.quests.util.ItemBuilder;
 import me.eeshe.quests.util.LogUtil;
 import me.eeshe.quests.util.PlaceholderUtil;
 import me.eeshe.quests.util.StringUtil;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -38,9 +40,15 @@ public class QuestListMenu extends PagedMenu {
   @Override
   public Inventory create() {
     final Inventory inventory = getMenu().createInventory(new QuestListMenuHolder(page), player);
+    final List<Quest> quests = questRepository.getAll();
+    final IQuestPlayer questPlayer = questPlayerRepository.get(player);
+    quests.sort(
+        Comparator.comparing(Quest::getId, String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(quest -> questPlayer.hasCompletedQuest(quest)) // completed last
+        );
 
     setFrameItems(inventory);
-    addPageItems(inventory, questRepository.getAll(), this::createQuestItem, page);
+    addPageItems(inventory, quests, this::createQuestItem, page);
     fillEmpty(inventory);
 
     return inventory;
@@ -51,8 +59,6 @@ public class QuestListMenu extends PagedMenu {
     final Map<String, Object> additionalConfigurations = getMenu().getAdditionalConfigurations();
 
     final IQuestPlayer questPlayer = questPlayerRepository.get(player);
-    final String questStatusKey =
-        questPlayer.hasCompletedQuest(quest) ? "completed" : "in-progress";
     Object loreObj = additionalConfigurations.get("quest-lore");
     List<String> questLore;
     if (loreObj instanceof List) {
@@ -64,36 +70,40 @@ public class QuestListMenu extends PagedMenu {
       questLore = new ArrayList<>();
     }
     Object statusMapObj = additionalConfigurations.get("quest-status");
-    Map<String, Object> questStatusMap;
-    if (statusMapObj instanceof Map) {
-      questStatusMap = (Map<String, Object>) statusMapObj;
+    ConfigurationSection questStatusSection;
+    if (statusMapObj instanceof ConfigurationSection) {
+      questStatusSection = (ConfigurationSection) statusMapObj;
     } else {
       LogUtil.warning(
           "QuestListMenu.createQuestItem: 'quest-status' expected Map<String,Object> but got "
               + (statusMapObj == null ? "null" : statusMapObj.getClass().getName()));
-      questStatusMap = new HashMap<>();
+      questStatusSection = null;
     }
-    String questStatus = (String) questStatusMap.get(questStatusKey);
+    final String questStatusKey =
+        questPlayer.hasCompletedQuest(quest) ? "completed" : "in-progress";
+    String questStatus = questStatusSection.getString(questStatusKey);
 
+    final DecimalFormat decimalFormat = new DecimalFormat("#,###.##");
     final Map<String, String> placeholders =
         new HashMap<>(
             Map.ofEntries(
-                Map.entry("%progress%", String.valueOf(questPlayer.getQuestProgress(quest))),
-                Map.entry("%required%", String.valueOf(quest.getGoal())),
+                Map.entry("%progress%", decimalFormat.format(questPlayer.getQuestProgress(quest))),
+                Map.entry("%required%", decimalFormat.format(quest.getGoal())),
                 Map.entry(
                     "%percentage%",
                     String.valueOf(
-                        new DecimalFormat("#.##")
-                            .format(
-                                ((double) questPlayer.getQuestProgress(quest)
-                                        / (double) quest.getGoal())
-                                    * 100))),
+                        decimalFormat.format(
+                            ((double) questPlayer.getQuestProgress(quest)
+                                    / (double) quest.getGoal())
+                                * 100))),
                 Map.entry("%status%", questStatus)));
     if (quest instanceof TargetQuest targetQuest) {
       placeholders.put("%target%", StringUtil.formatEnum(targetQuest.getTargetString()));
     }
 
     return PlaceholderUtil.formatPlaceholders(
-        new ItemBuilder(item).addLore(questLore).addLore(questStatus).build(), placeholders);
+        player,
+        new ItemBuilder(item).addLore(questLore).addLore(questStatus).build(),
+        placeholders);
   }
 }

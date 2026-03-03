@@ -35,9 +35,6 @@ public class Message {
   }
 
   public static void setMessageConfig(MessageConfig messageConfig) {
-    if (MESSAGE_CONFIG != null) {
-      return;
-    }
     MESSAGE_CONFIG = messageConfig;
   }
 

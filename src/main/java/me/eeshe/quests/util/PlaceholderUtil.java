@@ -22,7 +22,8 @@ public class PlaceholderUtil {
     return PlaceholderAPI.setPlaceholders(player, text);
   }
 
-  public static ItemStack formatPlaceholders(ItemStack item, Map<String, String> placeholders) {
+  public static ItemStack formatPlaceholders(
+      OfflinePlayer player, ItemStack item, Map<String, String> placeholders) {
     if (item == null) {
       return null;
     }
@@ -30,14 +31,14 @@ public class PlaceholderUtil {
 
     final ItemMeta meta = item.getItemMeta();
     if (meta.hasDisplayName()) {
-      meta.setDisplayName(formatPlaceholders(meta.getDisplayName(), placeholders));
+      meta.setDisplayName(formatPlaceholders(player, meta.getDisplayName(), placeholders));
     }
     final List<String> lore = meta.getLore();
     if (lore != null) {
       final ListIterator<String> loreIterator = lore.listIterator();
       while (loreIterator.hasNext()) {
         String loreLine = loreIterator.next();
-        loreLine = formatPlaceholders(loreLine, placeholders);
+        loreLine = formatPlaceholders(player, loreLine, placeholders);
 
         loreIterator.set(loreLine);
       }
@@ -49,12 +50,17 @@ public class PlaceholderUtil {
   }
 
   public static String formatPlaceholders(String text, Map<String, String> placeholders) {
+    return formatPlaceholders(null, text, placeholders);
+  }
+
+  public static String formatPlaceholders(
+      OfflinePlayer player, String text, Map<String, String> placeholders) {
     final boolean isPlaceholderAPIEnabled =
         Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
     for (Entry<String, String> entry : placeholders.entrySet()) {
       text = text.replace(entry.getKey(), entry.getValue());
       if (isPlaceholderAPIEnabled) {
-        text = PlaceholderAPI.setPlaceholders(null, text);
+        text = PlaceholderAPI.setPlaceholders(player, text);
       }
     }
     return StringUtil.formatColor(text);

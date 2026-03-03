@@ -6,6 +6,7 @@ import me.eeshe.quests.database.Database;
 import me.eeshe.quests.model.questplayer.IQuestPlayer;
 import me.eeshe.quests.util.LogUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -68,7 +69,7 @@ public class QuestPlayerRepository implements Repository {
     database.saveQuestPlayerAsync(questPlayer);
   }
 
-  public IQuestPlayer get(Player player) {
+  public IQuestPlayer get(OfflinePlayer player) {
     return cache.get(player.getUniqueId());
   }
 

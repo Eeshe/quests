@@ -188,8 +188,10 @@ public class YAMLPluginConfig extends YAMLConfig implements PluginConfig {
       }
 
       case QuestType.EXPLORING -> {
-        final Biome target = Registry.BIOME.get(NamespacedKey.fromString(targetName));
-        if (target == null) {
+        final Biome target;
+        try {
+          target = Registry.BIOME.get(NamespacedKey.fromString(targetName));
+        } catch (Exception e) {
           LogUtil.warning(
               "Unknown exploring target '" + targetName + "' configured for '" + questId + "'.");
           yield null;

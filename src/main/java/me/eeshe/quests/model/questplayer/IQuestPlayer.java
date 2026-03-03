@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 
 public interface IQuestPlayer {
 
-  void increaseQuestProgress(Quest quest, int increase);
+  void increaseQuestProgress(Quest quest, double increase);
 
-  void setQuestProgress(Quest quest, int progress);
+  void setQuestProgress(Quest quest, double progress);
 
   void completeQuest(Quest quest);
 
@@ -22,9 +22,9 @@ public interface IQuestPlayer {
 
   Player getPlayer();
 
-  int getQuestProgress(Quest quest);
+  double getQuestProgress(Quest quest);
 
-  ConcurrentHashMap<String, Integer> getQuestProgress();
+  ConcurrentHashMap<String, Double> getQuestProgress();
 
   Set<String> getCompletedQuestIds();
 

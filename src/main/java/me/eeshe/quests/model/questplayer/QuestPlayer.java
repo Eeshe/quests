@@ -16,7 +16,7 @@ public class QuestPlayer implements IQuestPlayer {
   private final UUID uuid;
   private final Set<String> completedQuestIds;
   private final QuestPlayerRepository questPlayerRepository;
-  private final ConcurrentHashMap<String, Integer> questProgress;
+  private final ConcurrentHashMap<String, Double> questProgress;
 
   public QuestPlayer(OfflinePlayer player, QuestPlayerRepository questPlayerRepository) {
     this.uuid = player.getUniqueId();
@@ -28,7 +28,7 @@ public class QuestPlayer implements IQuestPlayer {
   public QuestPlayer(
       OfflinePlayer player,
       Set<String> completedQuestIds,
-      ConcurrentHashMap<String, Integer> questProgress,
+      ConcurrentHashMap<String, Double> questProgress,
       QuestPlayerRepository questPlayerRepository) {
     this.uuid = player.getUniqueId();
     this.completedQuestIds = completedQuestIds;
@@ -37,17 +37,17 @@ public class QuestPlayer implements IQuestPlayer {
   }
 
   @Override
-  public int getQuestProgress(Quest quest) {
-    return questProgress.getOrDefault(quest.getId(), 0);
+  public double getQuestProgress(Quest quest) {
+    return questProgress.getOrDefault(quest.getId(), 0D);
   }
 
   @Override
-  public ConcurrentHashMap<String, Integer> getQuestProgress() {
+  public ConcurrentHashMap<String, Double> getQuestProgress() {
     return questProgress;
   }
 
   @Override
-  public void increaseQuestProgress(Quest quest, int progressIncrease) {
+  public void increaseQuestProgress(Quest quest, double progressIncrease) {
     if (hasCompletedQuest(quest)) {
       return;
     }
@@ -55,9 +55,9 @@ public class QuestPlayer implements IQuestPlayer {
   }
 
   @Override
-  public void setQuestProgress(Quest quest, int progress) {
+  public void setQuestProgress(Quest quest, double progress) {
     final int questGoal = quest.getGoal();
-    final int newProgress = Math.min(questGoal, progress);
+    final double newProgress = Math.min(questGoal, progress);
     questProgress.put(quest.getId(), newProgress);
 
     if (getQuestProgress(quest) < questGoal) {
@@ -88,7 +88,7 @@ public class QuestPlayer implements IQuestPlayer {
     if (quest == null) {
       return;
     }
-    questProgress.put(quest.getId(), 0);
+    questProgress.put(quest.getId(), 0D);
     completedQuestIds.remove(quest.getId());
     saveData();
   }

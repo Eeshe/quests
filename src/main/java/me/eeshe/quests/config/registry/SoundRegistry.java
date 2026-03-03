@@ -12,6 +12,8 @@ public class SoundRegistry extends ConfigRegistry<Sound> {
 
   public static final Sound QUEST_LIST_MENU_OPEN =
       new Sound("quest-list-menu-open", true, org.bukkit.Sound.BLOCK_NOTE_BLOCK_BELL, 0.6F, 1.2F);
+  public static final Sound PAGE_CHANGE =
+      new Sound("page-change", true, org.bukkit.Sound.ITEM_BOOK_PAGE_TURN, 0.6F, 1.2F);
 
   public static SoundRegistry getInstance() {
     return INSTANCE;

@@ -102,7 +102,7 @@ public class QuestListener implements Listener {
     }
     runAsynchronously(
         () -> {
-          final int travelledDistance = (int) Math.floor(from.distance(to));
+          final double travelledDistance = from.distance(to);
           final Set<RunningQuest> runningQuests = questRepository.getRunningQuests();
           increaseProgress(player, runningQuests, travelledDistance);
         });
@@ -121,7 +121,7 @@ public class QuestListener implements Listener {
     Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
   }
 
-  private void increaseProgress(Player player, Set<? extends Quest> quests, int progress) {
+  private void increaseProgress(Player player, Set<? extends Quest> quests, double progress) {
     if (quests == null) {
       return;
     }

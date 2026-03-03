@@ -156,9 +156,10 @@ public final class ItemBuilder {
       return item;
     }
     if (displayName != null) {
-      meta.setDisplayName(displayName);
+      meta.setDisplayName(StringUtil.formatColor(displayName));
     }
     if (lore != null) {
+      lore.replaceAll(StringUtil::formatColor);
       meta.setLore(lore);
     }
     if (unbreakable) {

@@ -27,6 +27,7 @@ public class YAMLMenuConfig extends YAMLConfig implements MenuConfig {
       config.addDefault(key + ".size", menu.getSize());
       config.addDefault(key + ".title", menu.getTitle());
       YAMLUtil.writeItemStack(config, key + ".frame-item", menu.getFrameItem());
+      YAMLUtil.writeItemStack(config, key + ".filler-item", menu.getFillerItem());
       YAMLUtil.writeItemStack(config, key + ".previous-page-item", menu.getPreviousPageItem());
       YAMLUtil.writeItemStack(config, key + ".next-page-item", menu.getNextPageItem());
       config.addDefault(key + ".additional", menu.getAdditionalConfigurations());

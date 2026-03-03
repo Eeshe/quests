@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.eeshe.quests.commands.CommandCompleter;
 import me.eeshe.quests.commands.CommandQuests;
 import me.eeshe.quests.commands.CommandRunner;
@@ -27,6 +28,7 @@ import me.eeshe.quests.database.MongoDatabase;
 import me.eeshe.quests.listeners.MenuListener;
 import me.eeshe.quests.listeners.PlayerConnectionListener;
 import me.eeshe.quests.listeners.QuestListener;
+import me.eeshe.quests.placeholderapi.QuestsExpansion;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.repository.Repository;
@@ -45,6 +47,7 @@ public class Quests extends JavaPlugin {
   private final List<Config> configs = new ArrayList<>();
   private final List<Repository> repositories = new ArrayList<>();
   private final List<Listener> listeners = new ArrayList<>();
+  private final List<PlaceholderExpansion> placeholderExpansions = new ArrayList<>();
 
   private PluginConfig pluginConfig;
 
@@ -65,14 +68,17 @@ public class Quests extends JavaPlugin {
     connectDatabase()
         .whenComplete(
             (unused, throwable) -> {
-              if (!database.isConnected()) {
-                LogUtil.error("Could not connect to database. Plugin will not load.");
+              if (throwable != null) {
+                LogUtil.error(
+                    "Could not connect to database. Plugin will not load. Error message: "
+                        + throwable.getMessage());
                 getServer().getPluginManager().disablePlugin(this);
                 return;
               }
               registerCommands();
               loadRepositories();
               registerListeners();
+              getServer().getScheduler().runTask(this, this::registerPlaceholderExpansions);
             });
   }
 
@@ -133,12 +139,24 @@ public class Quests extends JavaPlugin {
     listeners.addAll(
         List.of(
             new PlayerConnectionListener(questPlayerRepository),
-            new MenuListener(),
+            new MenuListener(this),
             new QuestListener(this)));
 
     final PluginManager pluginManager = getServer().getPluginManager();
     for (Listener listener : listeners) {
       pluginManager.registerEvents(listener, this);
+    }
+  }
+
+  private void registerPlaceholderExpansions() {
+    if (!getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+      return;
+    }
+    placeholderExpansions.clear();
+    placeholderExpansions.addAll(List.of(new QuestsExpansion(this)));
+
+    for (PlaceholderExpansion placeholderExpansion : placeholderExpansions) {
+      placeholderExpansion.register();
     }
   }
 
@@ -148,6 +166,7 @@ public class Quests extends JavaPlugin {
     disconnectDatabase(false);
     unloadRepositories();
     unregisterListeners();
+    unregisterPlaceholderExpansions();
   }
 
   private void unloadConfigs() {
@@ -173,6 +192,14 @@ public class Quests extends JavaPlugin {
     for (Listener listener : listeners) {
       HandlerList.unregisterAll(listener);
     }
+    listeners.clear();
+  }
+
+  private void unregisterPlaceholderExpansions() {
+    for (PlaceholderExpansion placeholderExpansion : placeholderExpansions) {
+      placeholderExpansion.unregister();
+    }
+    placeholderExpansions.clear();
   }
 
   public void reload() {
@@ -180,6 +207,7 @@ public class Quests extends JavaPlugin {
     disconnectDatabase(true);
     unloadRepositories();
     unregisterListeners();
+    unregisterPlaceholderExpansions();
 
     loadConfigs();
     connectDatabase()
@@ -192,6 +220,7 @@ public class Quests extends JavaPlugin {
               }
               loadRepositories();
               registerListeners();
+              registerPlaceholderExpansions();
             });
   }
 
