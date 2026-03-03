@@ -2,6 +2,7 @@ package me.eeshe.quests.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import me.eeshe.quests.Quests;
 import me.eeshe.quests.cache.QuestCache;
 import me.eeshe.quests.model.quests.ExploringQuest;
@@ -43,17 +44,19 @@ public class QuestRepository implements Repository {
     return new ArrayList<>(cache.getValues());
   }
 
-  public List<MiningQuest> getMiningQuests(Material material) {
+  public Set<MiningQuest> getMiningQuests(Material material) {
     return cache.getMiningQuests(material);
   }
 
-  public List<KillingQuest> getKillingQuests(EntityType entityType) {
+  public Set<KillingQuest> getKillingQuests(EntityType entityType) {
     return cache.getKillingQuests(entityType);
   }
 
-  public List<ExploringQuest> getExploringQuests(Biome biome) {
+  public Set<ExploringQuest> getExploringQuests(Biome biome) {
     return cache.getExploringQuests(biome);
   }
 
-  public List<RunningQuest> getRunningQuests() {}
+  public Set<RunningQuest> getRunningQuests() {
+    return cache.getRunningQuests();
+  }
 }

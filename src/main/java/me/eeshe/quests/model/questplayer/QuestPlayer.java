@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import me.eeshe.quests.Quests;
 import me.eeshe.quests.model.quests.Quest;
+import me.eeshe.quests.model.rewards.Reward;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -71,6 +73,14 @@ public class QuestPlayer implements IQuestPlayer {
     }
     completedQuestIds.add(quest.getId());
     saveData();
+
+    final Player player = getPlayer();
+    if (player == null) {
+      return;
+    }
+    for (Reward reward : quest.getRewards()) {
+      Bukkit.getScheduler().runTask(Quests.getInstance(), () -> reward.apply(player));
+    }
   }
 
   @Override

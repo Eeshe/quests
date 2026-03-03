@@ -35,7 +35,7 @@ public class KillingQuest extends Quest implements TargetQuest {
     final List<Reward> rewards =
         List.of(
             new CommandsReward(
-                List.of("eco give %player% 100", "say %player% completed quest %id%")),
+                List.of("eco give %player% 100", "say %player% completed a killing quest")),
             new ItemReward(itemReward));
     final EntityType target = EntityType.ZOMBIE;
 

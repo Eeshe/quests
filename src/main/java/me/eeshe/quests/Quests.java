@@ -24,8 +24,9 @@ import me.eeshe.quests.config.yaml.YAMLPluginConfig;
 import me.eeshe.quests.config.yaml.YAMLSoundConfig;
 import me.eeshe.quests.database.Database;
 import me.eeshe.quests.database.MongoDatabase;
-import me.eeshe.quests.listeners.MenuHandler;
+import me.eeshe.quests.listeners.MenuListener;
 import me.eeshe.quests.listeners.PlayerConnectionListener;
+import me.eeshe.quests.listeners.QuestListener;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.repository.Repository;
@@ -130,7 +131,10 @@ public class Quests extends JavaPlugin {
 
   private void registerListeners() {
     listeners.addAll(
-        List.of(new PlayerConnectionListener(questPlayerRepository), new MenuHandler()));
+        List.of(
+            new PlayerConnectionListener(questPlayerRepository),
+            new MenuListener(),
+            new QuestListener(this)));
 
     final PluginManager pluginManager = getServer().getPluginManager();
     for (Listener listener : listeners) {

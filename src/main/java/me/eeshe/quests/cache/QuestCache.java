@@ -1,7 +1,7 @@
 package me.eeshe.quests.cache;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import me.eeshe.quests.model.quests.ExploringQuest;
 import me.eeshe.quests.model.quests.KillingQuest;
@@ -14,11 +14,11 @@ import org.bukkit.entity.EntityType;
 
 public class QuestCache extends ConcurrentHashMapCache<String, Quest>
     implements MiningQuestCache, KillingQuestCache, ExploringQuestCache {
-  private final ConcurrentHashMapCache<Material, List<MiningQuest>> miningQuestCache =
+  private final ConcurrentHashMapCache<Material, Set<MiningQuest>> miningQuestCache =
       new ConcurrentHashMapCache<>();
-  private final ConcurrentHashMapCache<EntityType, List<KillingQuest>> killingQuestCache =
+  private final ConcurrentHashMapCache<EntityType, Set<KillingQuest>> killingQuestCache =
       new ConcurrentHashMapCache<>();
-  private final ConcurrentHashMapCache<Biome, List<ExploringQuest>> exploringQuestCache =
+  private final ConcurrentHashMapCache<Biome, Set<ExploringQuest>> exploringQuestCache =
       new ConcurrentHashMapCache<>();
   private final ConcurrentHashMapCache<String, RunningQuest> runningQuestCache =
       new ConcurrentHashMapCache<>();
@@ -26,7 +26,6 @@ public class QuestCache extends ConcurrentHashMapCache<String, Quest>
   @Override
   public void put(String key, Quest value) {
     super.put(key, value);
-
     if (value instanceof RunningQuest runningQuest) {
       runningQuestCache.put(key, runningQuest);
     } else if (value instanceof MiningQuest miningQuest) {
@@ -38,25 +37,40 @@ public class QuestCache extends ConcurrentHashMapCache<String, Quest>
     }
   }
 
+  @Override
+  public void clear() {
+    super.clear();
+    runningQuestCache.clear();
+    miningQuestCache.clear();
+    killingQuestCache.clear();
+    exploringQuestCache.clear();
+  }
+
   private <T extends Quest, K> void addToCache(
-      T quest, Function<T, K> targetExtractor, ConcurrentHashMapCache<K, List<T>> cache) {
+      T quest, Function<T, K> targetExtractor, ConcurrentHashMapCache<K, Set<T>> cache) {
     K key = targetExtractor.apply(quest);
-    List<T> list = cache.getOrDefault(key, new ArrayList<>());
+    Set<T> list = cache.getOrDefault(key, new HashSet<>());
     list.add(quest);
+
+    cache.put(key, list);
   }
 
   @Override
-  public List<MiningQuest> getMiningQuests(Material material) {
+  public Set<MiningQuest> getMiningQuests(Material material) {
     return miningQuestCache.get(material);
   }
 
   @Override
-  public List<KillingQuest> getKillingQuests(EntityType target) {
+  public Set<KillingQuest> getKillingQuests(EntityType target) {
     return killingQuestCache.get(target);
   }
 
   @Override
-  public List<ExploringQuest> getExploringQuests(Biome target) {
+  public Set<ExploringQuest> getExploringQuests(Biome target) {
     return exploringQuestCache.get(target);
+  }
+
+  public Set<RunningQuest> getRunningQuests() {
+    return new HashSet<>(runningQuestCache.getValues());
   }
 }

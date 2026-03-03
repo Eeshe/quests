@@ -1,10 +1,10 @@
 package me.eeshe.quests.cache;
 
-import java.util.List;
+import java.util.Set;
 import me.eeshe.quests.model.quests.KillingQuest;
 import org.bukkit.entity.EntityType;
 
 public interface KillingQuestCache {
 
-  List<KillingQuest> getKillingQuests(EntityType target);
+  Set<KillingQuest> getKillingQuests(EntityType target);
 }

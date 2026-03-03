@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class MenuHandler implements Listener {
+public class MenuListener implements Listener {
 
   @EventHandler
   public void onMenuClick(InventoryClickEvent event) {

@@ -43,7 +43,7 @@ public class RunningQuest extends Quest {
     final List<Reward> rewards =
         List.of(
             new CommandsReward(
-                List.of("eco give %player% 100", "say %player% completed quest %id%")),
+                List.of("eco give %player% 100", "say %player% completed a running quest")),
             new ItemReward(itemReward));
 
     return new RunningQuest(id, icon, goal, rewards);

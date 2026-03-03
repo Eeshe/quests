@@ -1,15 +1,19 @@
 package me.eeshe.quests.listeners;
 
-import java.util.List;
+import java.util.Set;
 import me.eeshe.quests.Quests;
 import me.eeshe.quests.model.questplayer.IQuestPlayer;
+import me.eeshe.quests.model.quests.ExploringQuest;
 import me.eeshe.quests.model.quests.KillingQuest;
 import me.eeshe.quests.model.quests.MiningQuest;
 import me.eeshe.quests.model.quests.Quest;
+import me.eeshe.quests.model.quests.RunningQuest;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -18,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 public class QuestListener implements Listener {
   private final Quests plugin;
@@ -38,7 +43,7 @@ public class QuestListener implements Listener {
     final Material blockType = event.getBlock().getType();
     runAsynchronously(
         () -> {
-          final List<MiningQuest> miningQuests = questRepository.getMiningQuests(blockType);
+          final Set<MiningQuest> miningQuests = questRepository.getMiningQuests(blockType);
           increaseProgress(event.getPlayer(), miningQuests, 1);
         });
   }
@@ -66,8 +71,49 @@ public class QuestListener implements Listener {
     final EntityType entityType = damaged.getType();
     runAsynchronously(
         () -> {
-          final List<KillingQuest> killingQuests = questRepository.getKillingQuests(entityType);
+          final Set<KillingQuest> killingQuests = questRepository.getKillingQuests(entityType);
           increaseProgress(damagerPlayer, killingQuests, 1);
+        });
+  }
+
+  @EventHandler
+  public void onPlayerMove(PlayerMoveEvent event) {
+    if (event.isCancelled()) {
+      return;
+    }
+    final Location from = event.getFrom();
+    final Location to = event.getTo();
+    if (to == null) {
+      return;
+    }
+    if (from.getBlockX() == to.getBlockX()
+        && from.getBlockY() == to.getBlockY()
+        && from.getBlockZ() == to.getBlockZ()) {
+      return;
+    }
+    final Player player = event.getPlayer();
+    handleRunningQuests(player, from, to);
+    handleExploringQuests(player, to);
+  }
+
+  private void handleRunningQuests(Player player, Location from, Location to) {
+    if (!player.isSprinting()) {
+      return;
+    }
+    runAsynchronously(
+        () -> {
+          final int travelledDistance = (int) Math.floor(from.distance(to));
+          final Set<RunningQuest> runningQuests = questRepository.getRunningQuests();
+          increaseProgress(player, runningQuests, travelledDistance);
+        });
+  }
+
+  private void handleExploringQuests(Player player, Location to) {
+    runAsynchronously(
+        () -> {
+          final Biome toBiome = to.getBlock().getBiome();
+          final Set<ExploringQuest> exploringQuests = questRepository.getExploringQuests(toBiome);
+          increaseProgress(player, exploringQuests, 1);
         });
   }
 
@@ -75,7 +121,10 @@ public class QuestListener implements Listener {
     Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
   }
 
-  private void increaseProgress(Player player, List<? extends Quest> quests, int progress) {
+  private void increaseProgress(Player player, Set<? extends Quest> quests, int progress) {
+    if (quests == null) {
+      return;
+    }
     final IQuestPlayer questPlayer = questPlayerRepository.get(player);
     if (questPlayer == null) {
       return;
