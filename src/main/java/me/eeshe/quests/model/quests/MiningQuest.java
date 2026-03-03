@@ -22,7 +22,7 @@ public class MiningQuest extends Quest implements TargetQuest {
     final ItemStack icon =
         ItemBuilder.builder()
             .material(Material.COAL_ORE)
-            .displayName("&7Mine %goal% %target%")
+            .displayName("&7Mine %required% %target%")
             .build();
     final int goal = 50;
     final ItemStack itemReward =

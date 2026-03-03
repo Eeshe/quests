@@ -11,14 +11,13 @@ import me.eeshe.quests.config.MessageConfig;
 import me.eeshe.quests.config.PluginConfig;
 import me.eeshe.quests.config.Sound;
 import me.eeshe.quests.config.SoundConfig;
-import me.eeshe.quests.config.registry.MessageRegistry;
-import me.eeshe.quests.config.registry.SoundRegistry;
 import me.eeshe.quests.config.yaml.YAMLMenuConfig;
 import me.eeshe.quests.config.yaml.YAMLMessageConfig;
 import me.eeshe.quests.config.yaml.YAMLPluginConfig;
 import me.eeshe.quests.config.yaml.YAMLSoundConfig;
 import me.eeshe.quests.database.Database;
 import me.eeshe.quests.database.MongoDatabase;
+import me.eeshe.quests.listeners.MenuHandler;
 import me.eeshe.quests.listeners.PlayerConnectionListener;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
@@ -61,10 +60,6 @@ public class Quests extends JavaPlugin {
               }
               loadRepositories();
               registerListeners();
-              for (int i = 0; i < 10; i++) {
-                MessageRegistry.TEST.send(Bukkit.getConsoleSender());
-                SoundRegistry.TEST.play(Bukkit.getConsoleSender());
-              }
             });
   }
 
@@ -105,7 +100,8 @@ public class Quests extends JavaPlugin {
   }
 
   private void registerListeners() {
-    listeners.addAll(List.of(new PlayerConnectionListener(questPlayerRepository)));
+    listeners.addAll(
+        List.of(new PlayerConnectionListener(questPlayerRepository), new MenuHandler()));
 
     final PluginManager pluginManager = getServer().getPluginManager();
     for (Listener listener : listeners) {

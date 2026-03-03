@@ -11,6 +11,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public class RunningQuest extends Quest {
@@ -24,7 +25,8 @@ public class RunningQuest extends Quest {
     final ItemStack icon =
         ItemBuilder.builder()
             .material(Material.LEATHER_BOOTS)
-            .displayName("&7Run %goal% blocks")
+            .displayName("&7Run %required% blocks")
+            .addFlag(ItemFlag.HIDE_ATTRIBUTES)
             .build();
     final int goal = 200;
     final ItemStack itemReward =

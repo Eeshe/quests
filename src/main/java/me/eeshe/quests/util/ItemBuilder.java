@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +36,48 @@ public final class ItemBuilder {
     return new ItemBuilder();
   }
 
+  public ItemBuilder() {}
+
+  public ItemBuilder(ItemStack item) {
+    if (item == null) {
+      return;
+    }
+    material(item.getType());
+    amount(item.getAmount());
+
+    final ItemMeta meta = item.getItemMeta();
+    if (meta.hasDisplayName()) {
+      displayName(meta.getDisplayName());
+    }
+    if (meta.hasLore()) {
+      lore(meta.getLore());
+    }
+    if (meta.isUnbreakable()) {
+      unbreakable(meta.isUnbreakable());
+    }
+    if (meta.hasCustomModelData()) {
+      customModelData(meta.getCustomModelData());
+    }
+    if (!meta.getItemFlags().isEmpty()) {
+      for (ItemFlag itemFlag : meta.getItemFlags()) {
+        addFlag(itemFlag);
+      }
+    }
+    if (!item.getEnchantments().isEmpty()) {
+      for (Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet()) {
+        addEnchantment(entry.getKey(), entry.getValue());
+      }
+    }
+    if (meta.hasAttributeModifiers()) {
+      for (Entry<Attribute, AttributeModifier> entry : meta.getAttributeModifiers().entries()) {
+        addAttributeModifier(entry.getKey(), entry.getValue());
+      }
+    }
+    if (meta instanceof SkullMeta skullMeta) {
+      skullOwner(skullMeta.getOwner());
+    }
+  }
+
   public ItemBuilder material(Material material) {
     this.material = material;
     return this;
@@ -53,6 +98,21 @@ public final class ItemBuilder {
     return this;
   }
 
+  public ItemBuilder addLore(List<String> lore) {
+    if (this.lore == null) {
+      this.lore = new ArrayList<>();
+    }
+    this.lore.addAll(lore);
+    return this;
+  }
+
+  public ItemBuilder addLore(String lore) {
+    if (this.lore == null) {
+      this.lore = new ArrayList<>();
+    }
+    return this;
+  }
+
   public ItemBuilder unbreakable(boolean unbreakable) {
     this.unbreakable = unbreakable;
     return this;
@@ -65,6 +125,12 @@ public final class ItemBuilder {
 
   public ItemBuilder addFlag(ItemFlag flag) {
     this.flags.add(flag);
+    if (flag == ItemFlag.HIDE_ATTRIBUTES) {
+      // HIDE_ATTRIBUTES requires the item to have at least one attribute modifier
+      addAttributeModifier(
+          Attribute.LUCK,
+          new AttributeModifier(NamespacedKey.minecraft("luck"), 0.1, Operation.ADD_NUMBER));
+    }
     return this;
   }
 

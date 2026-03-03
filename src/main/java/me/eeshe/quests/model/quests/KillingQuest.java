@@ -24,7 +24,7 @@ public class KillingQuest extends Quest implements TargetQuest {
     final ItemStack icon =
         ItemBuilder.builder()
             .material(Material.ZOMBIE_HEAD)
-            .displayName("&7Kill %goal% %target%")
+            .displayName("&7Kill %required% %target%")
             .build();
     final int goal = 50;
     final ItemStack itemReward =

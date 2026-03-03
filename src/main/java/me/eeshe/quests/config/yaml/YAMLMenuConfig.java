@@ -1,6 +1,7 @@
 package me.eeshe.quests.config.yaml;
 
 import java.util.List;
+import java.util.Map;
 import me.eeshe.quests.config.Menu;
 import me.eeshe.quests.config.MenuConfig;
 import me.eeshe.quests.config.registry.MenuRegistry;
@@ -26,10 +27,11 @@ public class YAMLMenuConfig extends YAMLConfig implements MenuConfig {
       config.addDefault(key + ".size", menu.getSize());
       config.addDefault(key + ".title", menu.getTitle());
       YAMLUtil.writeItemStack(config, key + ".frame-item", menu.getFrameItem());
-      config.addDefault(key + ".frame-slots", menu.getFrameSlots());
       YAMLUtil.writeItemStack(config, key + ".previous-page-item", menu.getPreviousPageItem());
       YAMLUtil.writeItemStack(config, key + ".next-page-item", menu.getNextPageItem());
+      config.addDefault(key + ".additional", menu.getAdditionalConfigurations());
     }
+    super.writeDefaults();
   }
 
   @Override
@@ -55,8 +57,17 @@ public class YAMLMenuConfig extends YAMLConfig implements MenuConfig {
     final ItemStack previousPageItem =
         YAMLUtil.readItemStack(getConfig(), key + ".previous-page-item");
     final ItemStack nextPageItem = YAMLUtil.readItemStack(getConfig(), key + ".next-page-item");
+    final Map<String, Object> additionalConfiguration =
+        menuSection.getConfigurationSection("additional").getValues(false);
 
     return new Menu(
-        key, size, title, frameItem, frameSlots, fillerItem, previousPageItem, nextPageItem);
+        key,
+        size,
+        title,
+        frameItem,
+        fillerItem,
+        previousPageItem,
+        nextPageItem,
+        additionalConfiguration);
   }
 }

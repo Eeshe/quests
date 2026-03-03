@@ -45,6 +45,6 @@ public class ExploringQuest extends Quest implements TargetQuest {
 
   @Override
   public String getTargetString() {
-    return target.getKey().toString();
+    return target.getKey().getKey();
   }
 }

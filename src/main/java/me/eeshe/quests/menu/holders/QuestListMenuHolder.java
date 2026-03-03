@@ -10,7 +10,9 @@ public class QuestListMenuHolder implements PagedMenuHolder {
   }
 
   @Override
-  public void handleClick(InventoryClickEvent event) {}
+  public void handleClick(InventoryClickEvent event) {
+    event.setCancelled(true);
+  }
 
   @Override
   public int getPage() {

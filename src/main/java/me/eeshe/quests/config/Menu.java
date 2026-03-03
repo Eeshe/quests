@@ -1,6 +1,6 @@
 package me.eeshe.quests.config;
 
-import java.util.List;
+import java.util.Map;
 import me.eeshe.quests.config.registry.MenuRegistry;
 import me.eeshe.quests.menu.holders.MenuHolder;
 import me.eeshe.quests.util.PlaceholderUtil;
@@ -17,28 +17,28 @@ public class Menu {
   private final int size;
   private final String title;
   private final ItemStack frameItem;
-  private final List<Integer> frameSlots;
   private final ItemStack fillerItem;
   private final ItemStack previousPageItem;
   private final ItemStack nextPageItem;
+  private final Map<String, Object> additionalConfigurations;
 
   public Menu(
       String key,
       int size,
       String title,
       ItemStack frameItem,
-      List<Integer> frameSlots,
       ItemStack fillerItem,
       ItemStack previousPageItem,
-      ItemStack nextPageItem) {
+      ItemStack nextPageItem,
+      Map<String, Object> additionalConfigurations) {
     this.key = key;
     this.size = size;
     this.title = title;
     this.frameItem = frameItem;
-    this.frameSlots = frameSlots;
     this.fillerItem = fillerItem;
     this.previousPageItem = previousPageItem;
     this.nextPageItem = nextPageItem;
+    this.additionalConfigurations = additionalConfigurations;
 
     MenuRegistry.getInstance().add(this);
   }
@@ -73,10 +73,6 @@ public class Menu {
     return frameItem;
   }
 
-  public List<Integer> getFrameSlots() {
-    return frameSlots;
-  }
-
   public ItemStack getFillerItem() {
     return fillerItem;
   }
@@ -87,5 +83,9 @@ public class Menu {
 
   public ItemStack getNextPageItem() {
     return nextPageItem;
+  }
+
+  public Map<String, Object> getAdditionalConfigurations() {
+    return additionalConfigurations;
   }
 }

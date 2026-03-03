@@ -24,4 +24,22 @@ public class StringUtil {
     }
     return ChatColor.translateAlternateColorCodes('&', text);
   }
+
+  public static String formatEnum(Enum<?> enumValue) {
+    return formatEnum(enumValue.name());
+  }
+
+  public static String formatEnum(String text) {
+    String replaced = text.replace('_', ' ');
+    String[] words = replaced.split(" ");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < words.length; i++) {
+      String word = words[i];
+      if (word.isEmpty()) continue;
+      String cap = Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase();
+      sb.append(cap);
+      if (i < words.length - 1) sb.append(" ");
+    }
+    return sb.toString();
+  }
 }
