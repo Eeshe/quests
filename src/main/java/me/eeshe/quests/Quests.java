@@ -1,8 +1,15 @@
 package me.eeshe.quests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import me.eeshe.quests.commands.CommandCompleter;
+import me.eeshe.quests.commands.CommandQuests;
+import me.eeshe.quests.commands.CommandRunner;
+import me.eeshe.quests.commands.PluginCommand;
+import me.eeshe.quests.commands.questadmin.CommandQuestsAdmin;
 import me.eeshe.quests.config.Config;
 import me.eeshe.quests.config.Menu;
 import me.eeshe.quests.config.MenuConfig;
@@ -24,12 +31,16 @@ import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.repository.Repository;
 import me.eeshe.quests.util.LogUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Quests extends JavaPlugin {
+  private final Map<String, PluginCommand> commands = new HashMap<>();
+
   private final List<Config> configs = new ArrayList<>();
   private final List<Repository> repositories = new ArrayList<>();
   private final List<Listener> listeners = new ArrayList<>();
@@ -58,6 +69,7 @@ public class Quests extends JavaPlugin {
                 getServer().getPluginManager().disablePlugin(this);
                 return;
               }
+              registerCommands();
               loadRepositories();
               registerListeners();
             });
@@ -85,6 +97,23 @@ public class Quests extends JavaPlugin {
     return database.connect();
   }
 
+  private void registerCommands() {
+    final CommandExecutor commandExecutor = new CommandRunner(this);
+    final TabCompleter tabCompleter = new CommandCompleter(this);
+    final List<PluginCommand> pluginCommands =
+        List.of(new CommandQuests(this), new CommandQuestsAdmin(this));
+
+    for (PluginCommand pluginCommand : pluginCommands) {
+      org.bukkit.command.PluginCommand bukkitPluginCommand =
+          pluginCommand.getPlugin().getServer().getPluginCommand(pluginCommand.getName());
+      if (bukkitPluginCommand == null) continue;
+
+      this.commands.put(pluginCommand.getName(), pluginCommand);
+      bukkitPluginCommand.setExecutor(commandExecutor);
+      bukkitPluginCommand.setTabCompleter(tabCompleter);
+    }
+  }
+
   private void loadRepositories() {
     repositories.clear();
 
@@ -92,7 +121,7 @@ public class Quests extends JavaPlugin {
     this.questPlayerRepository = new QuestPlayerRepository(this);
     repositories.addAll(List.of(questRepository, questPlayerRepository));
 
-    database.setRepositories(questRepository, questPlayerRepository);
+    database.setRepositories(questPlayerRepository);
 
     for (Repository repository : repositories) {
       repository.load();
@@ -149,9 +178,21 @@ public class Quests extends JavaPlugin {
     unregisterListeners();
 
     loadConfigs();
-    connectDatabase();
-    loadRepositories();
-    registerListeners();
+    connectDatabase()
+        .whenComplete(
+            (unused, throwable) -> {
+              if (!database.isConnected()) {
+                LogUtil.error("Could not connect to database. Plugin will not load.");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+              }
+              loadRepositories();
+              registerListeners();
+            });
+  }
+
+  public Map<String, PluginCommand> getCommands() {
+    return commands;
   }
 
   public PluginConfig getPluginConfig() {

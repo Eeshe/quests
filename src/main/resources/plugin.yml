@@ -3,3 +3,8 @@ name: Quests
 version: "@version@"
 api-version: 1.21
 softdepends: [PlaceholderAPI]
+
+commands:
+  quests:
+  questsadmin:
+

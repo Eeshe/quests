@@ -3,9 +3,9 @@ package me.eeshe.quests.model.questplayer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import me.eeshe.quests.model.quests.Quest;
 import me.eeshe.quests.repository.QuestPlayerRepository;
-import me.eeshe.quests.repository.QuestRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -13,69 +13,60 @@ import org.bukkit.entity.Player;
 public class QuestPlayer implements IQuestPlayer {
   private final UUID uuid;
   private final Set<String> completedQuestIds;
-  private final QuestRepository questRepository;
   private final QuestPlayerRepository questPlayerRepository;
+  private final ConcurrentHashMap<String, Integer> questProgress;
 
-  private String currentQuestId;
-  private int currentQuestProgress;
-
-  public QuestPlayer(
-      OfflinePlayer player,
-      QuestRepository questRepository,
-      QuestPlayerRepository questPlayerRepository) {
+  public QuestPlayer(OfflinePlayer player, QuestPlayerRepository questPlayerRepository) {
     this.uuid = player.getUniqueId();
     this.completedQuestIds = new HashSet<>();
-    this.currentQuestId = null;
-    this.currentQuestProgress = 0;
-    this.questRepository = questRepository;
+    this.questProgress = new ConcurrentHashMap<>();
     this.questPlayerRepository = questPlayerRepository;
   }
 
   public QuestPlayer(
       OfflinePlayer player,
       Set<String> completedQuestIds,
-      String currentQuestId,
-      int currentQuestProgress,
-      QuestRepository questRepository,
+      ConcurrentHashMap<String, Integer> questProgress,
       QuestPlayerRepository questPlayerRepository) {
     this.uuid = player.getUniqueId();
     this.completedQuestIds = completedQuestIds;
-    this.currentQuestId = currentQuestId;
-    this.currentQuestProgress = currentQuestProgress;
-    this.questRepository = questRepository;
+    this.questProgress = questProgress;
     this.questPlayerRepository = questPlayerRepository;
   }
 
   @Override
-  public void increaseCurrentQuestProgress(int progressIncrease) {
-    setCurrentQuestProgress(getCurrentQuestProgress() + progressIncrease);
+  public int getQuestProgress(Quest quest) {
+    return questProgress.getOrDefault(quest.getId(), 0);
   }
 
   @Override
-  public void setCurrentQuestProgress(int progress) {
-    final Quest currentQuest = getCurrentQuest();
-    if (currentQuest == null) {
-      return;
-    }
-    final int questGoal = currentQuest.getGoal();
-    currentQuestProgress = Math.min(questGoal, progress);
-
-    if (currentQuestProgress < questGoal) {
-      return;
-    }
-    completeCurrentQuest();
+  public ConcurrentHashMap<String, Integer> getQuestProgress() {
+    return questProgress;
   }
 
   @Override
-  public void completeCurrentQuest() {
-    final Quest currentQuest = getCurrentQuest();
-    if (currentQuest == null) {
+  public void increaseQuestProgress(Quest quest, int progressIncrease) {
+    setQuestProgress(quest, getQuestProgress(quest) + progressIncrease);
+  }
+
+  @Override
+  public void setQuestProgress(Quest quest, int progress) {
+    final int questGoal = quest.getGoal();
+    final int newProgress = Math.min(questGoal, progress);
+    questProgress.put(quest.getId(), newProgress);
+
+    if (getQuestProgress(quest) < questGoal) {
       return;
     }
-    currentQuestId = null;
-    currentQuestProgress = 0;
-    completedQuestIds.add(currentQuestId);
+    completeQuest(quest);
+  }
 
+  @Override
+  public void completeQuest(Quest quest) {
+    if (quest == null) {
+      return;
+    }
+    completedQuestIds.add(quest.getId());
     saveData();
   }
 
@@ -84,6 +75,7 @@ public class QuestPlayer implements IQuestPlayer {
     if (quest == null) {
       return;
     }
+    questProgress.put(quest.getId(), 0);
     completedQuestIds.remove(quest.getId());
     saveData();
   }
@@ -101,24 +93,6 @@ public class QuestPlayer implements IQuestPlayer {
   @Override
   public Player getPlayer() {
     return Bukkit.getPlayer(uuid);
-  }
-
-  @Override
-  public String getCurrentQuestId() {
-    return currentQuestId;
-  }
-
-  @Override
-  public Quest getCurrentQuest() {
-    if (currentQuestId == null) {
-      return null;
-    }
-    return questRepository.get(currentQuestId);
-  }
-
-  @Override
-  public int getCurrentQuestProgress() {
-    return currentQuestProgress;
   }
 
   @Override

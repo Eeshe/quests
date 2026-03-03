@@ -1,6 +1,7 @@
 package me.eeshe.quests.menu;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import me.eeshe.quests.model.quests.TargetQuest;
 import me.eeshe.quests.repository.QuestPlayerRepository;
 import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.util.ItemBuilder;
+import me.eeshe.quests.util.LogUtil;
 import me.eeshe.quests.util.PlaceholderUtil;
 import me.eeshe.quests.util.StringUtil;
 import org.bukkit.entity.Player;
@@ -48,25 +50,42 @@ public class QuestListMenu extends PagedMenu {
     final ItemStack item = quest.getIcon();
     final Map<String, Object> additionalConfigurations = getMenu().getAdditionalConfigurations();
 
-    final List<String> questLore = (List<String>) additionalConfigurations.get("quest-lore");
     final IQuestPlayer questPlayer = questPlayerRepository.get(player);
     final String questStatusKey =
         questPlayer.hasCompletedQuest(quest) ? "completed" : "in-progress";
-    final Map<String, Object> questStatusMap =
-        (Map<String, Object>) additionalConfigurations.get("quest-status");
-    final String questStatus = (String) questStatusMap.get(questStatusKey);
+    Object loreObj = additionalConfigurations.get("quest-lore");
+    List<String> questLore;
+    if (loreObj instanceof List) {
+      questLore = (List<String>) loreObj;
+    } else {
+      LogUtil.warning(
+          "QuestListMenu.createQuestItem: 'quest-lore' expected List<String> but got "
+              + (loreObj == null ? "null" : loreObj.getClass().getName()));
+      questLore = new ArrayList<>();
+    }
+    Object statusMapObj = additionalConfigurations.get("quest-status");
+    Map<String, Object> questStatusMap;
+    if (statusMapObj instanceof Map) {
+      questStatusMap = (Map<String, Object>) statusMapObj;
+    } else {
+      LogUtil.warning(
+          "QuestListMenu.createQuestItem: 'quest-status' expected Map<String,Object> but got "
+              + (statusMapObj == null ? "null" : statusMapObj.getClass().getName()));
+      questStatusMap = new HashMap<>();
+    }
+    String questStatus = (String) questStatusMap.get(questStatusKey);
 
     final Map<String, String> placeholders =
         new HashMap<>(
             Map.ofEntries(
-                Map.entry("%progress%", String.valueOf(questPlayer.getCurrentQuestProgress())),
+                Map.entry("%progress%", String.valueOf(questPlayer.getQuestProgress(quest))),
                 Map.entry("%required%", String.valueOf(quest.getGoal())),
                 Map.entry(
                     "%percentage%",
                     String.valueOf(
                         new DecimalFormat("#.##")
                             .format(
-                                ((double) questPlayer.getCurrentQuestProgress()
+                                ((double) questPlayer.getQuestProgress(quest)
                                         / (double) quest.getGoal())
                                     * 100))),
                 Map.entry("%status%", questStatus)));

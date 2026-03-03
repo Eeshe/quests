@@ -37,7 +37,7 @@ public class QuestPlayerRepository implements Repository {
 
   private void startDataSaveTask() {
     this.dataSaveTask =
-        Bukkit.getScheduler().runTaskTimer(plugin, this::saveOnlinePlayerData, 100L, 100L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::saveOnlinePlayerData, 1200L, 1200L);
   }
 
   private void saveOnlinePlayerData() {
@@ -87,6 +87,7 @@ public class QuestPlayerRepository implements Repository {
   }
 
   public void remove(Player player) {
+    get(player).saveData();
     cache.remove(player.getUniqueId());
   }
 }

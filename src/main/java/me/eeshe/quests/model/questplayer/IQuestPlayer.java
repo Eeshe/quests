@@ -2,16 +2,17 @@ package me.eeshe.quests.model.questplayer;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import me.eeshe.quests.model.quests.Quest;
 import org.bukkit.entity.Player;
 
 public interface IQuestPlayer {
 
-  void increaseCurrentQuestProgress(int increase);
+  void increaseQuestProgress(Quest quest, int increase);
 
-  void setCurrentQuestProgress(int progress);
+  void setQuestProgress(Quest quest, int progress);
 
-  void completeCurrentQuest();
+  void completeQuest(Quest quest);
 
   void resetQuest(Quest quest);
 
@@ -21,11 +22,9 @@ public interface IQuestPlayer {
 
   Player getPlayer();
 
-  String getCurrentQuestId();
+  int getQuestProgress(Quest quest);
 
-  Quest getCurrentQuest();
-
-  int getCurrentQuestProgress();
+  ConcurrentHashMap<String, Integer> getQuestProgress();
 
   Set<String> getCompletedQuestIds();
 

@@ -10,15 +10,16 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import me.eeshe.quests.Quests;
 import me.eeshe.quests.config.PluginConfig;
 import me.eeshe.quests.model.questplayer.IQuestPlayer;
 import me.eeshe.quests.model.questplayer.QuestPlayer;
 import me.eeshe.quests.repository.QuestPlayerRepository;
-import me.eeshe.quests.repository.QuestRepository;
 import me.eeshe.quests.util.LogUtil;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -31,7 +32,6 @@ public class MongoDatabase implements Database {
 
   private String database;
   private MongoClient mongoClient;
-  private QuestRepository questRepository;
   private QuestPlayerRepository questPlayerRepository;
 
   public MongoDatabase(final Quests plugin) {
@@ -112,9 +112,7 @@ public class MongoDatabase implements Database {
   }
 
   @Override
-  public void setRepositories(
-      QuestRepository questRepository, QuestPlayerRepository questPlayerRepository) {
-    this.questRepository = questRepository;
+  public void setRepositories(QuestPlayerRepository questPlayerRepository) {
     this.questPlayerRepository = questPlayerRepository;
   }
 
@@ -157,20 +155,18 @@ public class MongoDatabase implements Database {
         mongoClient.getDatabase(database).getCollection("quest_players");
     final Document document = collection.find(eq("_id", playerUuid.toString())).first();
     if (document == null) {
-      return new QuestPlayer(player, questRepository, questPlayerRepository);
+      return new QuestPlayer(player, questPlayerRepository);
     }
     final Set<String> completedQuests =
         new HashSet<>(document.getList("completedQuests", String.class, new ArrayList<>()));
-    final String currentQuestId = document.getString("currentQuestId");
-    final int currentQuestProgress = document.getInteger("currentQuestProgress", 0);
-
-    return new QuestPlayer(
-        player,
-        completedQuests,
-        currentQuestId,
-        currentQuestProgress,
-        questRepository,
-        questPlayerRepository);
+    final Map<String, Integer> map = document.get("questProgress", Map.class);
+    final ConcurrentHashMap<String, Integer> questProgress;
+    if (map == null) {
+      questProgress = new ConcurrentHashMap<>();
+    } else {
+      questProgress = new ConcurrentHashMap<>(map);
+    }
+    return new QuestPlayer(player, completedQuests, questProgress, questPlayerRepository);
   }
 
   @Override
@@ -201,8 +197,7 @@ public class MongoDatabase implements Database {
     final Document document =
         new Document("_id", playerUUid.toString())
             .append("completedQuests", questPlayer.getCompletedQuestIds())
-            .append("currentQuestId", questPlayer.getCurrentQuestId())
-            .append("currentQuestProgress", questPlayer.getCurrentQuestProgress());
+            .append("questProgress", questPlayer.getQuestProgress());
 
     final ReplaceOptions options = new ReplaceOptions().upsert(true);
     collection.replaceOne(eq("_id", playerUUid.toString()), document, options);
