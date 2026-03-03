@@ -13,6 +13,11 @@ public class ConcurrentHashMapCache<K, V> implements Cache<K, V> {
   }
 
   @Override
+  public V getOrDefault(K key, V defaultValue) {
+    return cacheMap.getOrDefault(key, defaultValue);
+  }
+
+  @Override
   public void put(K key, V value) {
     cacheMap.put(key, value);
   }

@@ -46,6 +46,9 @@ public class QuestPlayer implements IQuestPlayer {
 
   @Override
   public void increaseQuestProgress(Quest quest, int progressIncrease) {
+    if (hasCompletedQuest(quest)) {
+      return;
+    }
     setQuestProgress(quest, getQuestProgress(quest) + progressIncrease);
   }
 
